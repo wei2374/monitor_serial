@@ -110,13 +110,14 @@ struct datex_hdr{
     struct sr_desc sr_desc[8];
 };
 
+//278 byte
 struct dri_phdb{
-    dword time;
+    dword time; 
     union{
         struct basic_phdb basic;
-        //struct ext1_phdb ext1;
-        //struct ext2_phdb ext2;
-        //struct ext3_phdb ext3;
+        struct ext1_phdb ext1;
+        struct ext2_phdb ext2;
+        struct ext3_phdb ext3;
     }physdata;
     byte marker;
     byte reserved;

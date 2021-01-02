@@ -371,6 +371,7 @@ void cssl_setup(cssl_t *serial,
     
     /* now we setup the values in port's termios */
     serial->tio.c_cflag=baudrate|databits|checkparity|stopbits|CLOCAL|CREAD;
+    serial->tio.c_cflag|= PARENB; 
     serial->tio.c_iflag=IGNPAR;
     serial->tio.c_oflag=0;
     serial->tio.c_lflag=0;

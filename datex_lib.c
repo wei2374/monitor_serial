@@ -8,6 +8,7 @@
 
 #define record_size 256 
 #define record_number 10
+#define DRI_LEVEL_05 11
 
 bool m_fstart = true;
 bool m_storestart = false;
@@ -150,7 +151,11 @@ void Tx_buffer(unsigned char* payload,int length,cssl_t *serial){
     payload = finaltxbuff;
     length = buflen+2;
     
-    //print_array(finaltxbuff,length);
+    print_array(finaltxbuff,length);
+    //for(int i=0;i<length;i++){
+    //    cssl_putchar(serial,finaltxbuff[i]);
+    //}
+    
     cssl_putdata(serial, finaltxbuff, length);
 }
 
@@ -164,6 +169,7 @@ void prepare_phdb_request(cssl_t *serial){
     //Fill the header
     requestPkt.hdr.r_len = sizeof(struct datex_hdr)+sizeof(struct dri_phdb_req);
     requestPkt.hdr.r_maintype = DRI_MT_PHDB;
+    requestPkt.hdr.dri_level =  0;
 
     //The pkt contains one subrecord
     requestPkt.hdr.sr_desc[0].sr_type = 0;
@@ -172,7 +178,7 @@ void prepare_phdb_request(cssl_t *serial){
 
     //Fill the request
     pRequest = (struct dri_phdb_req*)&(requestPkt.phdbr);
-    pRequest->phdb_rcrd_type =DRI_PH_DISPL;
+    pRequest->phdb_rcrd_type = DRI_PH_DISPL;
     pRequest->tx_ival = 10;
     pRequest->phdb_class_bf = DRI_PHDBCL_REQ_BASIC_MASK|DRI_PHDBCL_REQ_EXT1_MASK|DRI_PHDBCL_REQ_EXT2_MASK|DRI_PHDBCL_REQ_EXT3_MASK;
 

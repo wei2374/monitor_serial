@@ -12,9 +12,9 @@ static int finished=0;
 
 static void process_buffer(int id, uint8_t *buf, int length){
     //printf("length is %d",length);
-    
+    //printf(" %02X",buf[0]);
     for(int i=0;i<length;i++){
-        //printf(" %02X",buf[i]);
+        printf(" %02X",buf[i]);
         CreateFrameListFromByte(buf[i]);
     }
     
@@ -51,17 +51,20 @@ static void dummy_callback(int id,
 void main(){
     cssl_t *serial;
     cssl_start();
-    serial=cssl_open("/dev/ttyACM0",
+    serial=cssl_open("/dev/ttyUSB0",
                     process_buffer,
                     0,
-                    115200,
+                    19200,
                     8,
-                    0,
+                    2,
                     1);
+    cssl_setflowcontrol(serial, 1, 0);
    
+    
     if (!serial) {
 	    printf("%s\n",cssl_geterrormsg());
     }
+    //printf("ok");
     unsigned char* prepared_msg;
     int length;
 
