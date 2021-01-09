@@ -68,9 +68,13 @@ void main(){
     unsigned char* prepared_msg;
     int length;
 
-    prepare_phdb_request(serial);  
+    //prepare_phdb_request(serial);
+    //stop_phdb_request(serial);
+    // prepare_60s_request(serial);
+    // stop_60s_request(serial);
+    //prepare_wave_request(serial);
+    stop_wave_request(serial);
 
-    
     while (!finished)
 	pause();
 

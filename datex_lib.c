@@ -21,8 +21,6 @@ byte FrameList[record_number][record_size];
 byte m_bList[record_size];
 
 void CreateFrameListFromByte(unsigned char b){
-    //printf("IN");
-    //printf("%d, %02X\n",counter1,b);
     //if get a byte which indicates the start of a msg
     if(b==0x7e && m_fstart){
         m_fstart = false;
@@ -73,9 +71,8 @@ void CreateFrameListFromByte(unsigned char b){
                
                 print_array(FrameList[array_counter],50);
                 array_counter++;
-
-
             }
+
             m_storeend=false;
         }
         else{
@@ -88,7 +85,6 @@ void CreateFrameListFromByte(unsigned char b){
 }
 
 void CreateRecordList(byte** FrameList,int length){
-    
     struct datex_record** record_array;
     record_array = malloc(length*sizeof(struct datex_struct*));
 
@@ -146,7 +142,22 @@ void Tx_buffer(unsigned char* payload,int length,cssl_t *serial){
     for(int j=0;j<buflen;j++){
         finaltxbuff[j] = temptxbuff[j];
     }
-    finaltxbuff[buflen] = checksum;
+    switch(checksum){
+        case 0x7e:
+            finaltxbuff[buflen] = checksum;
+            finaltxbuff[buflen+1] = 0x5e;
+            buflen++;
+            break;
+        case 0x7d:
+            finaltxbuff[buflen] = checksum;
+            finaltxbuff[buflen+1] = 0x5d;
+            buflen++;
+            break;
+        default:
+            finaltxbuff[buflen] = checksum;
+    }
+    
+    //finaltxbuff[buflen] = checksum;
     finaltxbuff[buflen+1] = 0x7e;
     payload = finaltxbuff;
     length = buflen+2;
@@ -159,6 +170,8 @@ void Tx_buffer(unsigned char* payload,int length,cssl_t *serial){
     cssl_putdata(serial, finaltxbuff, length);
 }
 
+
+
 void prepare_phdb_request(cssl_t *serial){
     struct datex_record_req requestPkt;
     struct dri_phdb_req *pRequest;
@@ -168,6 +181,8 @@ void prepare_phdb_request(cssl_t *serial){
 
     //Fill the header
     requestPkt.hdr.r_len = sizeof(struct datex_hdr)+sizeof(struct dri_phdb_req);
+    //printf("size of hdr is %d",sizeof(struct datex_hdr));
+    //printf("size of req is %d",sizeof(struct dri_phdb_req));
     requestPkt.hdr.r_maintype = DRI_MT_PHDB;
     requestPkt.hdr.dri_level =  0;
 
@@ -188,6 +203,147 @@ void prepare_phdb_request(cssl_t *serial){
     Tx_buffer(payload,length,serial);
 }
 
+void stop_phdb_request(cssl_t *serial){
+    struct datex_record_req requestPkt;
+    struct dri_phdb_req *pRequest;
+
+    //Clear the pkt
+    memset(&requestPkt,0x00,sizeof(requestPkt));
+
+    //Fill the header
+    requestPkt.hdr.r_len = sizeof(struct datex_hdr)+sizeof(struct dri_phdb_req);
+    requestPkt.hdr.r_maintype = DRI_MT_PHDB;
+    requestPkt.hdr.dri_level =  0;
+
+    //The pkt contains one subrecord
+    requestPkt.hdr.sr_desc[0].sr_type = 0;
+    requestPkt.hdr.sr_desc[0].sr_offset = (byte)0;
+    requestPkt.hdr.sr_desc[1].sr_type = (short) DRI_EOL_SUBR_LIST;
+
+    //Fill the request
+    pRequest = (struct dri_phdb_req*)&(requestPkt.phdbr);
+    pRequest->phdb_rcrd_type = DRI_PH_DISPL;
+    pRequest->tx_ival = 0;
+    pRequest->phdb_class_bf = 0;
+
+    byte* payload = (byte*)&requestPkt;
+    int length = sizeof(requestPkt);
+    //return payload    
+    Tx_buffer(payload,length,serial);
+}
+
+void prepare_60s_request(cssl_t *serial){
+    struct datex_record_req requestPkt;
+    struct dri_phdb_req *pRequest;
+
+    //Clear the pkt
+    memset(&requestPkt,0x00,sizeof(requestPkt));
+
+    //Fill the header
+    requestPkt.hdr.r_len = sizeof(struct datex_hdr)+sizeof(struct dri_phdb_req);
+    requestPkt.hdr.r_maintype = DRI_MT_PHDB;
+    requestPkt.hdr.dri_level =  0;
+
+    //The pkt contains one subrecord
+    requestPkt.hdr.sr_desc[0].sr_type = 0;
+    requestPkt.hdr.sr_desc[0].sr_offset = (byte)0;
+    requestPkt.hdr.sr_desc[1].sr_type = (short) DRI_EOL_SUBR_LIST;
+
+    //Fill the request
+    pRequest = (struct dri_phdb_req*)&(requestPkt.phdbr);
+    pRequest->phdb_rcrd_type = DRI_PH_60s_TREND;
+    pRequest->tx_ival = 60;
+    pRequest->phdb_class_bf = DRI_PHDBCL_REQ_BASIC_MASK|DRI_PHDBCL_REQ_EXT1_MASK|DRI_PHDBCL_REQ_EXT2_MASK|DRI_PHDBCL_REQ_EXT3_MASK;
+
+    byte* payload = (byte*)&requestPkt;
+    int length = sizeof(requestPkt);
+    //return payload    
+    Tx_buffer(payload,length,serial);
+}
+
+void stop_60s_request(cssl_t *serial){
+    struct datex_record_req requestPkt;
+    struct dri_phdb_req *pRequest;
+
+    //Clear the pkt
+    memset(&requestPkt,0x00,sizeof(requestPkt));
+
+    //Fill the header
+    requestPkt.hdr.r_len = sizeof(struct datex_hdr)+sizeof(struct dri_phdb_req);
+    requestPkt.hdr.r_maintype = DRI_MT_PHDB;
+    requestPkt.hdr.dri_level =  0;
+
+    //The pkt contains one subrecord
+    requestPkt.hdr.sr_desc[0].sr_type = 0;
+    requestPkt.hdr.sr_desc[0].sr_offset = (byte)0;
+    requestPkt.hdr.sr_desc[1].sr_type = (short) DRI_EOL_SUBR_LIST;
+
+    //Fill the request
+    pRequest = (struct dri_phdb_req*)&(requestPkt.phdbr);
+    pRequest->phdb_rcrd_type = DRI_PH_60s_TREND;
+    pRequest->tx_ival = 0;
+    pRequest->phdb_class_bf = 0;
+
+    byte* payload = (byte*)&requestPkt;
+    int length = sizeof(requestPkt);
+    //return payload    
+    Tx_buffer(payload,length,serial);
+}
 
 
+void prepare_wave_request(cssl_t *serial){
+    struct datex_record_wave_req requestPkt;
+    struct dri_wave_req *pRequest;
 
+    //Clear the pkt
+    memset(&requestPkt,0x00,sizeof(requestPkt));
+
+    //Fill the header
+    requestPkt.hdr.r_len = sizeof(struct datex_hdr)+sizeof(struct dri_wave_req);
+    requestPkt.hdr.r_maintype = DRI_MT_WAVE;
+    requestPkt.hdr.dri_level =  0;
+
+    //The pkt contains one subrecord
+    requestPkt.hdr.sr_desc[0].sr_type = 0;
+    requestPkt.hdr.sr_desc[0].sr_offset = (byte)0;
+    requestPkt.hdr.sr_desc[1].sr_type = (short) DRI_EOL_SUBR_LIST;
+
+    //Fill the request
+    pRequest = (struct dri_wave_req*)&(requestPkt.wfreq);
+    pRequest->req_type = WF_REQ_CONT_START;
+    pRequest->type[0] = DRI_WF_ECG1;
+    pRequest->type[1] = DRI_EOL_SUBR_LIST;
+
+    byte* payload = (byte*)&requestPkt;
+    int length = sizeof(requestPkt);
+    //return payload    
+    Tx_buffer(payload,length,serial);
+}
+
+void stop_wave_request(cssl_t *serial){
+    struct datex_record_wave_req requestPkt;
+    struct dri_wave_req *pRequest;
+
+    //Clear the pkt
+    memset(&requestPkt,0x00,sizeof(requestPkt));
+
+    //Fill the header
+    requestPkt.hdr.r_len = sizeof(struct datex_hdr)+sizeof(struct dri_wave_req);
+    requestPkt.hdr.r_maintype = DRI_MT_WAVE;
+    requestPkt.hdr.dri_level =  0;
+
+    //The pkt contains one subrecord
+    requestPkt.hdr.sr_desc[0].sr_type = 0;
+    requestPkt.hdr.sr_desc[0].sr_offset = (byte)0;
+    requestPkt.hdr.sr_desc[1].sr_type = (short) DRI_EOL_SUBR_LIST;
+
+    //Fill the request
+    pRequest = (struct dri_wave_req*)&(requestPkt.wfreq);
+    pRequest->req_type = WF_REQ_CONT_STOP;
+    pRequest->type[0] = DRI_EOL_SUBR_LIST;
+
+    byte* payload = (byte*)&requestPkt;
+    int length = sizeof(requestPkt);
+    //return payload    
+    Tx_buffer(payload,length,serial);
+}
