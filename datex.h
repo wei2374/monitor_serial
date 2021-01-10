@@ -9,12 +9,6 @@ typedef unsigned int dword;
 #define DRI_MT_FO 8
 
 
-#define DRI_MT_PHDB 0 
-#define DRI_MT_WAVE 1 
-#define DRI_MT_ALARM 4
-#define DRI_MT_NETWORK 5
-#define DRI_MT_FO 8 
-
 #define DRI_EOL_SUBR_LIST 0xFF 
 
 
@@ -473,10 +467,11 @@ struct wr_srcrds{
     short   *data;
 };
 struct al_srcrds{
-    byte ph_subrec[5*sizeof(struct dri_phdb)]; //one physiological database record accomodates up to five subrecords
+    struct dri_al_msg; //one physiological database record accomodates up to five subrecords
 };
 struct nw_srcrds{
-    byte ph_subrec[5*sizeof(struct dri_phdb)]; //one physiological database record accomodates up to five subrecords
+    struct nw_login_msg; 
+    struct nw_pat_descr; 
 };
 struct fo_srcrds{
     byte ph_subrec[5*sizeof(struct dri_phdb)]; //one physiological database record accomodates up to five subrecords
@@ -566,4 +561,101 @@ struct ext_wf_hdr{
     short   status_4;
     short   status_5;
     short   status_6;
+};
+
+/*alarm*/
+typedef enum {
+   F, T
+}
+boolean;
+
+enum dri_silience_info{
+    DRI_SI_NONE = 0,
+    DRI_SI_APNEA = 1,
+    DRI_SI_ASY = 2,
+    DRI_SI_APNEA_ASY = 3,
+    DRI_SI_ALL = 4,
+    DRI_SI_2MIN = 5,
+    DRI_SI_5MIN = 6,
+    DRI_SI_20S = 7
+};
+
+enum dri_alarm_color{
+    DRI_PR0 = 0,
+    DRI_PR1 = 1,
+    DRI_PR2 = 2,
+    DRI_PR3 = 3,
+};
+
+
+struct al_disp_al{
+    char text[80];
+    boolean text_changed;
+    enum dri_alarm_color color;
+    boolean color_changed;
+    short   reserved[6];
+};
+
+struct dri_al_msg{
+    short reserved;
+    boolean sound_on_off;
+    short reserved2;
+    short reserved3;
+    enum dri_silience_info  silience_info;
+    struct al_disp_al   al_disp[5];
+    short   reserved[5];
+    
+};
+
+enum dri_al_tx_cmds{
+    DRI_AL_XMIT_STATUS = 0,
+    DRI_AL_ENTER_DIFFMODE = 2,
+    DRI_AL_EXIT_DIFFMODE = 3
+};
+
+struct al_tx_cmds{
+    enum dri_al_tx_cmds cmd;
+    short reserved[5]; 
+};
+
+struct datex_alarm_req{
+    struct datex_hdr hdr;
+    struct al_tx_cmds alreq;
+};
+
+/*network managemnet*/
+struct nw_login_msg{
+    struct nw_dev_descr nw_dev_descr;
+};
+
+struct nw_dev_descr
+{
+    byte    ethernet_addr[6];
+    short   dev_type;
+    short   dri_level;
+    short   reserved[10];
+};
+
+struct nw_pat_descr{
+    char    pat_1stname[30];
+    char    pat_2ndname[40];
+    char    pat_id[40];
+    char    middle_name[30];
+    short   gender;
+    short   age_years;
+    short   age_days;
+    short   age_hours;
+    short   height;
+    short   height_unit;
+    short   weight;
+    short   weight_unit;
+    short   year_birth_date;
+    short   month_birth_date;
+    short   day_birth_date;
+    short   hour_birth_date;
+    short   bsa;
+    char    location[32];
+    char    issuer[32];
+    short   change_src;
+    short   reserved[59];
 };

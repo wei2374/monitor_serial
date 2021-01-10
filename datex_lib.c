@@ -291,6 +291,35 @@ void stop_60s_request(cssl_t *serial){
 }
 
 
+
+void stop_wave_request(cssl_t *serial){
+    struct datex_record_wave_req requestPkt;
+    struct dri_wave_req *pRequest;
+
+    //Clear the pkt
+    memset(&requestPkt,0x00,sizeof(requestPkt));
+
+    //Fill the header
+    requestPkt.hdr.r_len = sizeof(struct datex_hdr)+sizeof(struct dri_wave_req);
+    requestPkt.hdr.r_maintype = DRI_MT_WAVE;
+    requestPkt.hdr.dri_level =  0;
+
+    //The pkt contains one subrecord
+    requestPkt.hdr.sr_desc[0].sr_type = 0;
+    requestPkt.hdr.sr_desc[0].sr_offset = (byte)0;
+    requestPkt.hdr.sr_desc[1].sr_type = (short) DRI_EOL_SUBR_LIST;
+
+    //Fill the request
+    pRequest = (struct dri_wave_req*)&(requestPkt.wfreq);
+    pRequest->req_type = WF_REQ_CONT_STOP;
+    pRequest->type[0] = DRI_EOL_SUBR_LIST;
+
+    byte* payload = (byte*)&requestPkt;
+    int length = sizeof(requestPkt);
+    //return payload    
+    Tx_buffer(payload,length,serial);
+}
+
 void prepare_wave_request(cssl_t *serial){
     struct datex_record_wave_req requestPkt;
     struct dri_wave_req *pRequest;
@@ -320,16 +349,17 @@ void prepare_wave_request(cssl_t *serial){
     Tx_buffer(payload,length,serial);
 }
 
-void stop_wave_request(cssl_t *serial){
-    struct datex_record_wave_req requestPkt;
-    struct dri_wave_req *pRequest;
+
+void prepare_alarm_request(cssl_t *serial){
+    struct datex_alarm_req requestPkt;
+    struct al_tx_cmds *pRequest;
 
     //Clear the pkt
     memset(&requestPkt,0x00,sizeof(requestPkt));
 
     //Fill the header
-    requestPkt.hdr.r_len = sizeof(struct datex_hdr)+sizeof(struct dri_wave_req);
-    requestPkt.hdr.r_maintype = DRI_MT_WAVE;
+    requestPkt.hdr.r_len = sizeof(struct datex_hdr)+sizeof(struct al_tx_cmds);
+    requestPkt.hdr.r_maintype = DRI_MT_ALARM;
     requestPkt.hdr.dri_level =  0;
 
     //The pkt contains one subrecord
@@ -338,9 +368,8 @@ void stop_wave_request(cssl_t *serial){
     requestPkt.hdr.sr_desc[1].sr_type = (short) DRI_EOL_SUBR_LIST;
 
     //Fill the request
-    pRequest = (struct dri_wave_req*)&(requestPkt.wfreq);
-    pRequest->req_type = WF_REQ_CONT_STOP;
-    pRequest->type[0] = DRI_EOL_SUBR_LIST;
+    pRequest = (struct dri_wave_req*)&(requestPkt.alreq);
+    pRequest->cmd = DRI_AL_XMIT_STATUS;
 
     byte* payload = (byte*)&requestPkt;
     int length = sizeof(requestPkt);
