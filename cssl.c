@@ -410,12 +410,12 @@ void cssl_setflowcontrol(cssl_t *serial,
     }
     
     /* We setup xon/xoff (soft) flow control */
-    if (xonxoff) {
+    /*if (xonxoff) {
 	serial->tio.c_iflag |= (IXON|IXOFF);
     } else {
 	serial->tio.c_iflag &= ~(IXON|IXOFF);
     }
-    
+    */
     tcsetattr(serial->fd,TCSANOW,&(serial->tio));
 
     cssl_error=CSSL_OK;

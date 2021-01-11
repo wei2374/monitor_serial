@@ -67,9 +67,9 @@ void CreateFrameListFromByte(unsigned char b){
             if(checksum==m_bList[counter1-1]){
                 printf("correct");
                 copy_array(FrameList[array_counter], m_bList,counter1);
-                print_array(m_bList,50);
+                //print_array(m_bList,50);
                
-                print_array(FrameList[array_counter],50);
+                //print_array(FrameList[array_counter],50);
                 array_counter++;
             }
 
@@ -251,8 +251,8 @@ void prepare_60s_request(cssl_t *serial){
 
     //Fill the request
     pRequest = (struct dri_phdb_req*)&(requestPkt.phdbr);
-    pRequest->phdb_rcrd_type = DRI_PH_60s_TREND;
-    pRequest->tx_ival = 60;
+    pRequest->phdb_rcrd_type = DRI_PH_10s_TREND;
+    pRequest->tx_ival = 10;
     pRequest->phdb_class_bf = DRI_PHDBCL_REQ_BASIC_MASK|DRI_PHDBCL_REQ_EXT1_MASK|DRI_PHDBCL_REQ_EXT2_MASK|DRI_PHDBCL_REQ_EXT3_MASK;
 
     byte* payload = (byte*)&requestPkt;
@@ -280,7 +280,7 @@ void stop_60s_request(cssl_t *serial){
 
     //Fill the request
     pRequest = (struct dri_phdb_req*)&(requestPkt.phdbr);
-    pRequest->phdb_rcrd_type = DRI_PH_60s_TREND;
+    pRequest->phdb_rcrd_type = DRI_PH_10s_TREND;
     pRequest->tx_ival = 0;
     pRequest->phdb_class_bf = 0;
 
@@ -368,7 +368,7 @@ void prepare_alarm_request(cssl_t *serial){
     requestPkt.hdr.sr_desc[1].sr_type = (short) DRI_EOL_SUBR_LIST;
 
     //Fill the request
-    pRequest = (struct dri_wave_req*)&(requestPkt.alreq);
+    pRequest = (struct al_tx_cmds*)&(requestPkt.alreq);
     pRequest->cmd = DRI_AL_XMIT_STATUS;
 
     byte* payload = (byte*)&requestPkt;

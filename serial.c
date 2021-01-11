@@ -6,19 +6,20 @@
 
 
 /* if it is time to finish */
-static int finished=0;
+int finished=0;
 
 
 
 static void process_buffer(int id, uint8_t *buf, int length){
     //printf("length is %d",length);
-    //printf(" %02X",buf[0]);
+    printf(" %02X",buf[0]);
     for(int i=0;i<length;i++){
-        printf(" %02X",buf[i]);
+        //printf(" %02X",buf[i]);
         CreateFrameListFromByte(buf[i]);
     }
     
     fflush(stdout);
+    //finished=1;
 }
 
 /* example callback, it gets its id, buffer, and buffer length */
@@ -58,7 +59,9 @@ void main(){
                     8,
                     2,
                     1);
-    cssl_setflowcontrol(serial, 1, 0);
+
+   cssl_setflowcontrol(serial, 1, 0);
+  
    
     
     if (!serial) {
@@ -68,15 +71,31 @@ void main(){
     unsigned char* prepared_msg;
     int length;
 
-    //prepare_phdb_request(serial);
-    //stop_phdb_request(serial);
-    // prepare_60s_request(serial);
-    // stop_60s_request(serial);
-    //prepare_wave_request(serial);
+    //stop_60s_request(serial);
+    stop_phdb_request(serial);
     stop_wave_request(serial);
 
-    while (!finished)
-	pause();
+    //prepare_phdb_request(serial);
+    
+    sleep(6);
+    //prepare_60s_request(serial);
+
+    //stop_phdb_request(serial);
+    //stop_60s_request(serial);
+    prepare_wave_request(serial);
+    
+
+    while (!finished){
+
+	    pause();
+    }
+        
+    /*finished = 0;
+    prepare_60s_request(serial);
+    while (!finished){
+
+	    pause();
+    }*/
 
     printf("\n^D - we exit\n");
 

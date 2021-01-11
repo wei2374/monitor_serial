@@ -467,16 +467,17 @@ struct wr_srcrds{
     short   *data;
 };
 struct al_srcrds{
-    struct dri_al_msg; //one physiological database record accomodates up to five subrecords
+    byte ph_subrec[5*sizeof(struct dri_phdb)]; //one physiological database record accomodates up to five subrecords
 };
+
 struct nw_srcrds{
-    struct nw_login_msg; 
-    struct nw_pat_descr; 
+//    struct nw_login_msg a1; 
+//    struct nw_pat_descr a2; 
+byte ph_subrec[5*sizeof(struct dri_phdb)];//one physiological database record accomodates up to five subrecords
 };
 struct fo_srcrds{
     byte ph_subrec[5*sizeof(struct dri_phdb)]; //one physiological database record accomodates up to five subrecords
 };
-
 
 
 enum dri_phdb_class{
@@ -603,7 +604,7 @@ struct dri_al_msg{
     short reserved3;
     enum dri_silience_info  silience_info;
     struct al_disp_al   al_disp[5];
-    short   reserved[5];
+    short   reserved4[5];
     
 };
 
@@ -623,11 +624,8 @@ struct datex_alarm_req{
     struct al_tx_cmds alreq;
 };
 
-/*network managemnet*/
-struct nw_login_msg{
-    struct nw_dev_descr nw_dev_descr;
-};
 
+/*network managemnet*/
 struct nw_dev_descr
 {
     byte    ethernet_addr[6];
@@ -635,6 +633,12 @@ struct nw_dev_descr
     short   dri_level;
     short   reserved[10];
 };
+
+struct nw_login_msg{
+    struct nw_dev_descr nw_dev_descr2;
+};
+
+
 
 struct nw_pat_descr{
     char    pat_1stname[30];
