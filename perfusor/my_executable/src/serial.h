@@ -1,1 +1,0 @@
-void test_serial(unsigned char* msg, int length);
